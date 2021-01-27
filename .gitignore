@@ -1,0 +1,5 @@
+.envrc
+node_modules
+build
+.googleapi-tokens.json
+*.log

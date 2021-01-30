@@ -33,10 +33,13 @@ function resolve_attachment_files(extract_dir: string, attachments: Attachment[]
     return attachments.map(a => all_files.find(f => f.startsWith(`${a.unique_id}_${a._id}.`))!)
 }
 
-export async function backup(signal_recipient_id: number, google_photos_album_title: string) {
+export async function backup(
+    backup_path: string,
+    signal_recipient_id: number,
+    google_photos_album_title: string) {
     const extract_dir = fs.mkdtempSync("/tmp/signal-backup")
     console.debug(`extract_dir is: ${extract_dir}`)
-    await extract(extract_dir);
+    await extract(backup_path, extract_dir);
     
     const google_photos = new GooglePhotosTarget(google_photos_album_title)
     await google_photos.init()
@@ -64,13 +67,12 @@ async function get_attachments_of_channel(extract_dir: string, recipient_id: num
 
 }
 
-async function extract(target_dir: string) {
+async function extract(backup_path:string, target_dir: string) {
     const args = [
         "-o", target_dir,
         "-p", config.SIGNAL_BACKUP_KEY,
         "-f",
-        path.resolve(config.SIGNAL_BACKUP_FILE)
+        path.resolve(backup_path)
     ]
-    console.debug(args)
     await run_proc(extractor_path, args)
 }

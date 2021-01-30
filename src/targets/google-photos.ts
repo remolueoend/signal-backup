@@ -3,8 +3,6 @@ import {google} from "googleapis"
 import { config } from "../config"
 import { Credentials } from "google-auth-library"
 import { parseUrl} from "query-string"
-import { writeFileSync } from "fs"
-import path from "path"
 const GooglePhotos = require("googlephotos")
 const { createHttpTerminator } = require("http-terminator")
 
@@ -49,16 +47,13 @@ export class GooglePhotosTarget implements Target {
         this.oauthClient.on("tokens", tokens => {
             this.update_tokens(tokens)
         })
-        try {
-            this.tokens = require("./.googleapi-tokens.json")
-        }catch(err) {
-            console.warn("could not load google tokens", err)
+        if(config.GOOGLE_API_TOKENS) {
+            this.tokens = JSON.parse(config.GOOGLE_API_TOKENS)
         }
     }
     
     private update_tokens(tokens: Credentials) {
         this.tokens = tokens
-        writeFileSync(path.resolve(__dirname, "./.googleapi-tokens.json"), JSON.stringify(tokens))
     }
 
     async init() {
@@ -77,6 +72,7 @@ export class GooglePhotosTarget implements Target {
         }
 
         this.oauthClient.setCredentials(this.tokens!)
+        await this.oauthClient.getAccessToken()
     }
     
     async upload_candidates(files: string[], base_dir: string) {
@@ -88,7 +84,7 @@ export class GooglePhotosTarget implements Target {
             album = await photos.albums.create(this.album_title)
         }
         
-        const existing_items: MediaItem[] = (await photos.mediaItems.search(album!.id)).mediaItems
+        const existing_items: MediaItem[] = (await photos.mediaItems.search(album!.id)).mediaItems || []
         const missing_files = files.filter(f => !existing_items.some(e => e.filename === f))
         
         
@@ -105,6 +101,11 @@ export class GooglePhotosTarget implements Target {
         } else {
             console.log("nothing to upload")
         }
+    }
+    
+    async get_valid_tokens() {
+        await this.init()
+        return this.tokens
     }
 }
 

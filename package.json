@@ -8,8 +8,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "ts-node src/index.ts backup 322 \"Family Chat\"",
-    "build": "./esbuild.js && (cd signal-backup-decode && cargo build --release) && cp signal-backup-decode/target/release/signal-backup-decode ./build/"
+    "dev": "ts-node src/index.ts backup 322 \"Family-Chat\"",
+    "build.deps": "(cd signal-backup-decode && cargo build --release) && mkdir -p ./build && cp signal-backup-decode/target/release/signal-backup-decode ./build/",
+    "build": "./esbuild.js"
   },
   "devDependencies": {
     "@types/node": "^14.14.22",
@@ -19,10 +20,12 @@
     "googlephotos": "https://github.com/roopakv/google-photos.git",
     "query-string": "^6.13.8",
     "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
+    "typescript": "^4.1.3",
+    "http-terminator": "^2.0.3"
   },
   "dependencies": {
-    "http-terminator": "^2.0.3",
-    "sqlite3": "^5.0.1"
+    "sqlite3": "^5.0.1",
+    "ky-universal": "^0.6.0",
+    "ky": "0.17.0"
   }
 }

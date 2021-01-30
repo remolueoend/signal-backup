@@ -1,0 +1,18 @@
+# exclude everthing and gradually include what we need to build a docker image:
+*
+
+# signal-backup-decode
+!signal-backup-decode/Cargo.toml
+!signal-backup-decode/Cargo.lock
+!signal-backup-decode/Cargo.lock
+!signal-backup-decode/build.rs
+!signal-backup-decode/src
+!signal-backup-decode/proto
+
+# root
+!package.json
+!yarn.lock
+!src
+!esbuild.js
+!tsconfig.json
+!run.sh

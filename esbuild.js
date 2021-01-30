@@ -7,6 +7,6 @@ require("esbuild").build({
     entryPoints: ["./src/index.ts"],
     bundle: true,
     outfile: "./build/index.js",
-    external: ["sqlite3 "],
+    external: ["sqlite3", "ky-universal"],
     platform: "node",
 })

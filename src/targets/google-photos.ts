@@ -3,6 +3,7 @@ import {google} from "googleapis"
 import { config } from "../config"
 import { Credentials } from "google-auth-library"
 import { parseUrl} from "query-string"
+import { file } from "googleapis/build/src/apis/file"
 const GooglePhotos = require("googlephotos")
 const { createHttpTerminator } = require("http-terminator")
 
@@ -40,7 +41,7 @@ export class GooglePhotosTarget implements Target {
     private oauthClient = new google.auth.OAuth2(
         config.GOOGLE_API_CLIENT_ID,
         config.GOOGLE_API_SECRET,
-        config.GOOGLE_API_REDIR_URL
+        "http://localhost:3001/auth-callback"
     )
     
     constructor(protected album_title: string) {
@@ -76,6 +77,8 @@ export class GooglePhotosTarget implements Target {
     }
     
     async upload_candidates(files: string[], base_dir: string) {
+        if(files.length == 0) return
+
         console.log("upload_candidates:", files)
         const photos = new GooglePhotos(this.tokens?.access_token)
         const all_albums: Album[] = (await photos.albums.list()).albums;
@@ -91,13 +94,18 @@ export class GooglePhotosTarget implements Target {
         if(missing_files.length) {
             console.log("uploading to album", album)
             console.log("uploading following files", missing_files)
-            await photos.mediaItems.uploadMultiple(
-                album!.id,
-                missing_files.map(f => ({name: f})),
-                base_dir,
-                10000,
-                60 * 1000 * 5
-            )
+            try {
+                await photos.mediaItems.uploadMultiple(
+                    album!.id,
+                    missing_files.map(f => ({name: f})),
+                    base_dir,
+                    10000,
+                    60 * 1000 * 5
+                )
+            } catch(err) {
+                console.error("ERROR: failed to upload files.")
+                console.error(err)
+            }
         } else {
             console.log("nothing to upload")
         }

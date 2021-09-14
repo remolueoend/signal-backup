@@ -30,7 +30,7 @@ async function run_proc(name: string, args: string[]) {
 
 function resolve_attachment_files(extract_dir: string, attachments: Attachment[]) {
     const all_files = fs.readdirSync(path.resolve(extract_dir, "attachment"))
-    return attachments.map(a => all_files.find(f => f.startsWith(`${a.unique_id}_${a._id}.`))!)
+    return attachments.map(a => all_files.find(f => f.startsWith(`${a.unique_id}_${a._id}.`))!).filter(f => f != null)
 }
 
 export async function backup(
@@ -41,13 +41,22 @@ export async function backup(
     console.debug(`extract_dir is: ${extract_dir}`)
     await extract(backup_path, extract_dir);
     
+    if(fs.readdirSync(extract_dir).length < 3) {
+        throw new Error("seems like the extraction failed.")
+    }
+    
     const google_photos = new GooglePhotosTarget(google_photos_album_title)
     await google_photos.init()
     const file_list = await get_attachments_of_channel(extract_dir, signal_recipient_id)
-    google_photos.upload_candidates(
-        resolve_attachment_files(extract_dir, file_list),
-        path.resolve(extract_dir, "attachment")
-    )
+    if(file_list.length > 0) {
+        await google_photos.upload_candidates(
+            resolve_attachment_files(extract_dir, file_list),
+            path.resolve(extract_dir, "attachment")
+        )
+    } else {
+        console.warn("no media files for the given group found in extracted backup")
+    }
+    fs.rmSync(extract_dir, {recursive: true, force: true})
 }
 
 async function get_attachments_of_channel(extract_dir: string, recipient_id: number) {

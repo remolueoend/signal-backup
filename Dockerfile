@@ -34,5 +34,7 @@ COPY --from=build-stage ./app/build build
 COPY run.sh run.sh
 
 ENV NODE_ENV=production
+ENV UPLOAD_PORT=3001
 
+EXPOSE 3001
 ENTRYPOINT ["./run.sh"]

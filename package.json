@@ -8,7 +8,8 @@
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
-    "dev": "ts-node src/index.ts backup 322 \"Family-Chat\"",
+    "dev-server": "ts-node src/index.ts start-server 322 \"Family-Chat\"",
+    "dev-backup": "ts-node src/index.ts backup ./latest.backup 322 \"Family-Chat\"",
     "build.deps": "(cd signal-backup-decode && cargo build --release) && mkdir -p ./build && cp signal-backup-decode/target/release/signal-backup-decode ./build/",
     "build": "./esbuild.js"
   },
